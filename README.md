@@ -2,7 +2,7 @@
 Extract data from YouTube comments section
 # YT Comment Gold Digger
 
-Paste a YouTube link → Get spam-free summary + stats.
+Paste a YouTube link → Get spam-free summary + great stats.
 
 ## Setup
 1. npm install
