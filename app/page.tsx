@@ -44,7 +44,7 @@ export default function Home() {
           className="flex-1"
           disabled={loading}
         />
-        <Button on  onClick={summarize} disabled={loading || !url}>
+        <Button onClick={summarize} disabled={loading || !url}>
           {loading ? "Digging..." : "Summarize"}
         </Button>
       </div>
