@@ -44,34 +44,49 @@ export async function POST(request: NextRequest) {
     const views = parseInt(video.statistics.viewCount).toLocaleString();
     const totalComments = parseInt(video.statistics.commentCount);
 
-    const comments = commentsData.items?.map(
+    const comments: string[] = commentsData.items?.map(
       (item: any) => item.snippet.topLevelComment.snippet.textDisplay
     ) || [];
 
     // 2. AI: Extract health anecdotes
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0.3,
-      messages: [
-        {
-          role: "system",
-          content: `You are a health anecdote miner. Extract ONLY real personal stories where:
+    let anecdotes = [];
+    let summary = "No strong anecdotes found.";
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.3,
+        messages: [
+          {
+            role: "system",
+            content: `You are a health anecdote miner. Extract ONLY real personal stories where:
 - Someone (or family member) reduced/stopped medication
 - A natural remedy/diet/drink led to improvement
 - Include: who, what remedy, what outcome
 Rate each 1–5 stars based on clarity and impact.
 Return JSON only.`,
-        },
-        {
-          role: "user",
-          content: `Comments:\n${comments.map((c, i) => `[${i + 1}] ${c}`).join("\n")}`,
-        },
-      ],
-    });
+          },
+          {
+            role: "user",
+            content: `Comments:\n${comments
+              .map((c: string, i: number) => `[${i + 1}] ${c}`)
+              .join("\n")}`,
+          },
+        ],
+      });
 
-    const aiResult = JSON.parse(completion.choices[0].message.content || "{}");
+      const raw = completion.choices[0]?.message?.content?.trim();
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        anecdotes = parsed.anecdotes || [];
+        summary = parsed.summary || summary;
+      }
+    } catch (aiError) {
+      console.error("OpenAI failed:", aiError);
+      // Continue with basic stats
+    }
 
-    // 3. Count high-value (basic)
+    // 3. Basic high-value count
     const highValueCount = comments.filter((c: string) =>
       /med|pill|dose|stop|reduce|mom|dad|grand|healed|fixed|tea|juice|diet/i.test(c)
     ).length;
@@ -86,11 +101,11 @@ Return JSON only.`,
         highValueCount,
         highValueRatio: `${highValueRatio}%`,
       },
-      anecdotes: aiResult.anecdotes || [],
-      summary: aiResult.summary || "No strong anecdotes found.",
+      anecdotes,
+      summary,
     });
   } catch (error: any) {
-    console.error("Error:", error.message);
-    return Response.json({ error: "AI processing failed" }, { status: 500 });
+    console.error("API error:", error.message);
+    return Response.json({ error: "Processing failed" }, { status: 500 });
   }
 }
