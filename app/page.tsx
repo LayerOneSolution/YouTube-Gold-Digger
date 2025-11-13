@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Star } from "lucide-react";
+import { Copy, Star, TrendingUp } from "lucide-react";
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -97,7 +97,7 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl break-words">
-                  {result.video?.title || "Untitled Video"}
+                  {result.video?.title}
                 </CardTitle>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Badge variant="secondary">{result.stats?.totalViews} views</Badge>
@@ -108,6 +108,51 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <Separator className="my-4" />
+
+                {/* TOP 20 COMMENTS */}
+                {result.topComments?.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      Top 20 Most Positive Comments
+                    </h3>
+                    <div className="space-y-3">
+                      {result.topComments.map((c: any, i: number) => (
+                        <div key={i} className="border rounded-lg p-3 bg-muted/30 text-sm">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-foreground">#{i + 1}</span>
+                            <div className="flex gap-1">
+                              {[...Array(5)].map((_, s) => (
+                                <div
+                                  key={s}
+                                  className={`w-4 h-4 rounded-full ${
+                                    s < c.sentiment ? "bg-green-500" : "bg-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-muted-foreground text-xs">
+                              Sentiment: {c.sentiment}/5
+                            </span>
+                          </div>
+                          <p className="text-foreground/90 leading-relaxed">{c.text}</p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="mt-2 h-7 text-xs"
+                            onClick={() => copyToClipboard(c.text)}
+                          >
+                            <Copy className="w-3 h-3 mr-1" /> Copy
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Separator className="my-6" />
+
+                {/* ANECDOTES */}
                 {result.anecdotes?.length > 0 ? (
                   <div className="space-y-6">
                     <h3 className="font-semibold text-lg">Top Anecdotes</h3>
@@ -132,7 +177,7 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No strong anecdotes found in top 100 comments.</p>
+                  <p className="text-muted-foreground">No strong anecdotes found.</p>
                 )}
               </CardContent>
             </Card>
