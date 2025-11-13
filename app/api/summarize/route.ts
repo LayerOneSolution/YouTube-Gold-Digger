@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const views = parseInt(video.statistics.viewCount).toLocaleString();
     const totalComments = parseInt(video.statistics.commentCount);
 
-    const comments = commentsData.items?.map(
+    const comments: string[] = commentsData.items?.map(
       (item: any) => item.snippet.topLevelComment.snippet.textDisplay
     ) || [];
 
