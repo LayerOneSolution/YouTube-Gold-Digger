@@ -1,8 +1,8 @@
 // app/page.tsx
-// CACHE-BUSTER v2025-08-10 – forces Vercel to rebuild CSS
+// CACHE-BUSTER v2025-08-11 – forces Tailwind rebuild
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,11 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const summarize = async () => {
     setLoading(true);
@@ -32,6 +37,8 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen bg-background py-12 px-6 md:px-12 lg:px-24">
@@ -99,13 +106,9 @@ export default function Home() {
 
               <CardContent>
                 <Separator className="my-4" />
-                {/* FIXED: No hydration error */}
-                <div 
-                  className="whitespace-pre-wrap text-sm font-sans text-foreground/80"
-                  dangerouslySetInnerHTML={{ 
-                    __html: result.summary || "No summary available." 
-                  }} 
-                />
+                <p className="whitespace-pre-wrap text-sm font-sans text-foreground/80">
+                  {result.summary || "No summary available."}
+                </p>
               </CardContent>
             </Card>
           </div>
