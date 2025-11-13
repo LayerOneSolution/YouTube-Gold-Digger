@@ -97,6 +97,10 @@ Return ONLY valid JSON (no markdown, no code blocks):
 
     const highValueRatio = totalComments > 0 ? ((highValueCount / totalComments) * 100).toFixed(1) : "0";
 
+    // Deduplicate: Remove anecdotes from topComments to avoid overlap
+    const anecdoteTexts = anecdotes.map((a: any) => a.story.toLowerCase());
+    const uniqueTopComments = topComments.filter((c: any) => !anecdoteTexts.includes(c.text.toLowerCase()));
+
     return Response.json({
       video: { title },
       stats: {
@@ -105,7 +109,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
         highValueCount,
         highValueRatio: `${highValueRatio}%`,
       },
-      topComments,
+      topComments: uniqueTopComments,
       anecdotes,
       summary,
     });
