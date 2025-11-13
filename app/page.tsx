@@ -1,4 +1,5 @@
 // app/page.tsx
+// CACHE-BUSTER v2025-08-10 – forces Vercel to rebuild CSS
 "use client";
 
 import { useState } from "react";
@@ -16,6 +17,7 @@ export default function Home() {
 
   const summarize = async () => {
     setLoading(true);
+    setResult(null);
     try {
       const res = await fetch("/api/summarize", {
         method: "POST",
@@ -33,10 +35,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background py-12 px-6 md:px-12 lg:px-24">
-      {/* Max width + centered */}
+      {/* ---------- CENTERED CONTAINER ---------- */}
       <div className="max-w-5xl mx-auto space-y-12">
 
-        {/* Title */}
+        {/* ---------- TITLE ---------- */}
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
             YouTube Comment Gold Digger
@@ -46,7 +48,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Input Row — FULL WIDTH */}
+        {/* ---------- INPUT + BUTTON ---------- */}
         <div className="flex flex-col sm:flex-row gap-4 items-stretch w-full">
           <Input
             placeholder="Paste YouTube link here..."
@@ -54,19 +56,18 @@ export default function Home() {
             onChange={(e) => setUrl(e.target.value)}
             className="flex-1 min-w-0 text-base font-mono"
             disabled={loading}
-            // Ensures long URLs wrap cleanly
             style={{ wordBreak: "break-all" }}
           />
           <Button
             onClick={summarize}
             disabled={loading || !url}
-            className="w-full sm:w-auto min-w-fit"
+            className="w-full sm:w-auto"
           >
             {loading ? "Digging..." : "Summarize"}
           </Button>
         </div>
 
-        {/* Loading */}
+        {/* ---------- LOADING ---------- */}
         {loading && (
           <Card>
             <CardHeader>
@@ -80,7 +81,7 @@ export default function Home() {
           </Card>
         )}
 
-        {/* Result */}
+        {/* ---------- RESULT ---------- */}
         {result && !loading && (
           <div className="space-y-8">
             <Card>
@@ -89,14 +90,22 @@ export default function Home() {
                   {result.video?.title || "Untitled Video"}
                 </CardTitle>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <Badge variant="secondary">{result.stats?.totalViews || "N/A"} views</Badge>
-                  <Badge variant="secondary">{result.stats?.totalComments || 0} comments</Badge>
+                  <Badge variant="secondary">
+                    {result.stats?.totalViews || "N/A"} views
+                  </Badge>
+                  <Badge variant="secondary">
+                    {result.stats?.totalComments || 0} comments
+                  </Badge>
                   <Badge>{result.stats?.highValueCount || 0} high-value</Badge>
-                  <Badge variant="outline">{result.stats?.highValueRatio || "0%"} signal</Badge>
+                  <Badge variant="outline">
+                    {result.stats?.highValueRatio || "0%"} signal
+                  </Badge>
                 </div>
               </CardHeader>
+
               <CardContent>
                 <Separator className="my-4" />
+                {/* ---- SUMMARY TEXT ---- */}
                 <pre className="whitespace-pre-wrap text-sm font-sans text-foreground/80">
                   {result.summary || "No summary available."}
                 </pre>
